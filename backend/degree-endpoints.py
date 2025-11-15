@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session 
 from models import Base, Course, CourseRequisites, Degree, DegreeCourse
-from schemas import Course, CourseReq, Degree, DegreeCourse
+from schemas import CourseModel, CourseReqModel, DegreeModel, DegreeCourseModel
 
 app = FastAPI()
 
