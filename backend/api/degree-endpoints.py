@@ -7,7 +7,7 @@ from schemas import Course, CourseReq, Degree, DegreeCourse
 
 app = FastAPI()
 
-engine = create_engine("sqlite:///./CBAT TEST DB V3.db")
+engine = create_engine("sqlite:///./cbat_base.db")
 Base.metadata.create_all(engine)
 
 def get_db():
@@ -23,6 +23,10 @@ def get_degrees(department: str = None, level: str = None, type: str = None, db:
     # If 'name' was passed in, filter by it
     if department:
         users = db.query(Degree).filter(Degree.department.ilike(f"%{department}%")).all()
+    elif level:
+        users = db.query(Degree).filter(Degree.level.ilike(f"%{level}%")).all()
+    elif level:
+        users = db.query(Degree).filter(Degree.type.ilike(f"%{type}%")).all()
     else:
-        users = db.query(User).all()
+        users = db.query(Degree).all()
     return users
