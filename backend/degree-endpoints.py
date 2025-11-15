@@ -18,11 +18,6 @@ def get_db():
         db.close()
 
 
-@app.get("/degrees/{degreeId}")
-def get_degreeby_id(degreeId:int, db: Session = Depends(get_db)):
-    degree = db.query(Degree).filter(Degree.degree_id.ilike(degreeId)).first()
-    return degree
-
 @app.get("/degrees/")
 def get_degrees(department: str = None, level: str = None, type: str = None, db: Session = Depends(get_db)):
     # If 'name' was passed in, filter by it
@@ -33,4 +28,25 @@ def get_degrees(department: str = None, level: str = None, type: str = None, db:
         degrees = db.query(Degree).filter(Degree.level.ilike(f"%{level}%")).all()
     if type:
         degrees = db.query(Degree).filter(Degree.type.ilike(f"%{type}%")).all()
+    return degrees
+
+@app.get("/degrees/{degreeId}")
+def get_degreeby_id(degreeId:int, db: Session = Depends(get_db)):
+    degree = db.query(Degree).filter(Degree.degree_id.ilike(degreeId)).first()
+    return degree
+
+@app.get("/degrees/{degreeId}/courses")
+def get_coursesby_degree(degreeId: int, db: Session = Depends(get_db)):
+    courses = db.query(DegreeCourse).filter(DegreeCourse.degree_id == degreeId).all()
+    return courses
+
+@app.get("/courses/{courseId}/degrees")
+def get_degreeby_courses(courseId: str, db: Session = Depends(get_db)):
+    details = []
+    degree_course = db.query(DegreeCourse).filter(DegreeCourse.course_id == courseId).all()
+    for degree in degree_course:
+        details.append(degree.degree_id)
+    degrees = []
+    for detail in details:
+        degrees.append(db.query(Degree).filter(Degree.degree_id.ilike(detail)).first())
     return degrees
