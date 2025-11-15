@@ -18,15 +18,19 @@ def get_db():
         db.close()
 
 
+@app.get("/degrees/{degreeId}")
+def get_degreeby_id(degreeId:int, db: Session = Depends(get_db)):
+    degree = db.query(Degree).filter(Degree.degree_id.ilike(degreeId)).first()
+    return degree
+
 @app.get("/degrees/")
 def get_degrees(department: str = None, level: str = None, type: str = None, db: Session = Depends(get_db)):
     # If 'name' was passed in, filter by it
+    degrees = db.query(Degree).all()
     if department:
-        users = db.query(Degree).filter(Degree.department.ilike(f"%{department}%")).all()
-    elif level:
-        users = db.query(Degree).filter(Degree.level.ilike(f"%{level}%")).all()
-    elif level:
-        users = db.query(Degree).filter(Degree.type.ilike(f"%{type}%")).all()
-    else:
-        users = db.query(Degree).all()
-    return users
+        degrees = db.query(Degree).filter(Degree.department.ilike(f"%{department}%")).all()
+    if level:
+        degrees = db.query(Degree).filter(Degree.level.ilike(f"%{level}%")).all()
+    if type:
+        degrees = db.query(Degree).filter(Degree.type.ilike(f"%{type}%")).all()
+    return degrees
