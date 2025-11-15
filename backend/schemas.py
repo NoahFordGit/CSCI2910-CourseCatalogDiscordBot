@@ -2,7 +2,7 @@
 from pydantic import BaseModel
 
 'The model for a course'
-class Course(BaseModel):
+class CourseModel(BaseModel):
     course_id:str
     prefix:str
     course:int
@@ -19,7 +19,7 @@ class Course(BaseModel):
         orm_mode=True
 
 'The model for a course requisite'
-class CourseReq(BaseModel):
+class CourseReqModel(BaseModel):
     course_id:str
     prereq_id:str
     coreq_id:str
@@ -28,7 +28,7 @@ class CourseReq(BaseModel):
         orm_mode=True
 
 'The model for a degree'
-class Degree(BaseModel):
+class DegreeModel(BaseModel):
     degree_id:int
     title:str
     level:str
@@ -42,7 +42,7 @@ class Degree(BaseModel):
         orm_mode=True
 
 'The model for a degree course'
-class DegreeCourse(BaseModel):
+class DegreeCourseModel(BaseModel):
     degree_id:int
     course_id:str
 
