@@ -49,6 +49,22 @@ def get_degrees(department: str = None, level: str = None, type: str = None, db:
         degrees = db.query(Degree).filter(Degree.type.ilike(f"%{type}%")).all()
     return degrees
 
+@app.get("/degrees/search")
+def get_degrees(search: str, db: Session = Depends(get_db)):
+    search_fields = [
+        Degree.type,
+        Degree.title,
+        Degree.department,
+        Degree.level,
+    ]
+
+    for field in search_fields:
+        result = db.query(Degree).filter(field.ilike(f"%{search}%")).all()
+        if result:
+            return result
+    return None
+
+
 @app.get("/degrees/{degreeId}")
 def get_degreeby_id(degreeId:int, db: Session = Depends(get_db)):
     degree = db.query(Degree).filter(Degree.degree_id.ilike(degreeId)).first()
