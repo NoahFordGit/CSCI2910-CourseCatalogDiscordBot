@@ -58,3 +58,11 @@ def get_course(course_id: int, db: Session = Depends(get_db)):
 def get_requisites(course_id: int, db: Session = Depends(get_db)):
     requisites = db.query(CourseRequisites.course_id.ilike(f"%{course_id}%")).all()
     return requisites
+
+# get all prereq courses
+@app.get("/courses/{course_id}/prerequisites")
+def get_prerequisites(course_id: int, db: Session = Depends(get_db)):
+    prereqs = db.query(Course).filter(Course.course_id.ilike(f"%{course_id}%")).all()
+    return prereqs
+
+
