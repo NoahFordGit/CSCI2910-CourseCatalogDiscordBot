@@ -1,0 +1,42 @@
+cbat_base.db change log --- by Olivia Smith
+
+This is where changes to the database will be logged for future reference, starting with the commit on 11/11/25. Most recent commits will appear first. If anything is missing or incorrect, contact me asap.
+
+
+---------------
+
+Commit 11/20/25:
+
+- Added SCMT, DIGM, and MCOM courses to the course table
+- Added pre/coreqs for all CSCI, ECON, and FNCE courses (CBAT courses only, no gen eds) to the 	course_requisites table
+- Added degree associations to degrees 3 through 6 to their associated CBAT courses to degree_course 
+
+---------------
+
+Commit (2/2) 11/15/25:
+
+- Changed the database name to "cbat_base.db"
+
+---------------
+
+Commit (1/2) 11/15/25:
+
+- Added BADM, CSCI, ECON, FNCE, and MGMT courses to the course table
+- Added the remaining CBAT degrees to the degree table. *This table is now complete*
+- Added a few degree_course entries in relation to degree number 3
+
+---------------
+
+Commit (2/2) 11/11/25:
+
+- Fixed some spelling errors throughout 
+
+---------------
+
+Commit (1/2) 11/11/25:
+
+- Database file created in the git repo
+- Added ACCT course data to all tables for testing purposes
+
+
+---------------
