@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session 
 
 from models import Degree, DegreeCourse, Course
-from schemas import DegreeModel, DegreeCourseModel, CourseModel
+from schemas import DegreeModel, CourseModel
 from .database import get_db
 
 router = APIRouter()
