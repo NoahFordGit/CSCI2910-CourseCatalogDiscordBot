@@ -1,50 +1,46 @@
-'Schemas for all database tables to convert them to Json'
 from pydantic import BaseModel
+from typing import Optional
 
-'The model for a course'
 class CourseModel(BaseModel):
     course_id:str
     prefix:str
     course:int
     credits:int
     title:str
-    description:str
-    prereq_notes:str
-    coreq_notes:str
-    prereq_id:str
-    coreq_id:str
-    degree_id:int
+    description: Optional[str] = None
+    prereq_notes: Optional[str] = None
+    coreq_notes: Optional[str] = None
+    prereq_id: Optional[str] = None
+    coreq_id: Optional[str] = None
+    degree_id: Optional[int] = None
 
     class Config:
-        orm_mode=True
+        from_attributes = True
 
-'The model for a course requisite'
 class CourseReqModel(BaseModel):
     course_id:str
-    prereq_id:str
-    coreq_id:str
+    prereq_id:Optional[str]
+    coreq_id:Optional[str]
 
     class Config:
-        orm_mode=True
+        from_attributes = True
 
-'The model for a degree'
 class DegreeModel(BaseModel):
     degree_id:int
     title:str
     level:str
     type:str
-    concentration:str
+    concentration:Optional[str]
     department:str
-    description:str
-    course_id:str
+    description:Optional[str]
+    course_id:Optional[str]
 
     class Config:
-        orm_mode=True
+        from_attributes = True
 
-'The model for a degree course'
 class DegreeCourseModel(BaseModel):
     degree_id:int
     course_id:str
 
     class Config:
-        orm_mode=True
+        from_attributes = True
