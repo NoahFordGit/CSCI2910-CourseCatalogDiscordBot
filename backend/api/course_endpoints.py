@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import or_, String
 from sqlalchemy.orm import Session 
 
 from models import Course, CourseRequisites

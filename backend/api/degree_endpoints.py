@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import or_
 from sqlalchemy.orm import Session 
 
 from models import Degree, DegreeCourse, Course
@@ -41,7 +40,7 @@ def get_degrees_search(
 
     if concentration:
         query = query.filter(Degree.concentration.ilike(f"%{concentration}%"))
-        
+
     return query.all()
 
 # gets degree by degree ID
