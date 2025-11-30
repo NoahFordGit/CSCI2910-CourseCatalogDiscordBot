@@ -1,0 +1,78 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import or_, String
+from sqlalchemy.orm import Session 
+
+from models import Course, CourseRequisites
+from schemas import CourseModel, CourseReqModel
+from .database import get_db
+
+router = APIRouter()
+
+# get all courses
+@router.get("/courses/", response_model=list[CourseModel])
+def get_courses(db: Session = Depends(get_db)):
+    courses = db.query(Course).all()
+    return courses
+
+# get specific course by course_id
+@router.get("/courses/{course_id}", response_model=CourseModel)
+def get_course(course_id: str, db: Session = Depends(get_db)):
+    course = db.get(Course, course_id)
+
+    if course is None:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    return course
+
+# get course-id's prereqs and coreqs ids
+@router.get("/courses/{course_id}/requisites", response_model=list[CourseReqModel])
+def get_requisites(course_id: str, db: Session = Depends(get_db)):
+    requisites = (
+    db.query(CourseRequisites)
+      .filter(CourseRequisites.course_id == course_id)
+      .all()
+    )
+    return requisites
+
+# get prereq courses for course_id
+@router.get("/courses/{course_id}/prerequisites", response_model=list[str])
+def get_prerequisites(course_id: str, db: Session = Depends(get_db)):
+    reqs = (
+        db.query(CourseRequisites)
+        .filter(CourseRequisites.course_id == course_id)
+        .all()
+    )
+
+    # filter for only not None prereqs
+    prereqs = [r.prereq_id for r in reqs if r.prereq_id is not None]
+
+    return prereqs
+
+# get coreq courses for course_id
+@router.get("/courses/{course_id}/corequisites", response_model=list[str])
+def get_coreqs(course_id: str, db: Session = Depends(get_db)):
+    reqs = (
+        db.query(CourseRequisites)
+        .filter(CourseRequisites.course_id == course_id)
+        .all()
+    )
+
+    # filter for only not None prereqs
+    coreqs = [r.coreq_id for r in reqs if r.coreq_id is not None]
+
+    return coreqs
+
+# Can search through courses to find the desired course matching the search with either
+# the title, prefix, credits, or degree_id
+@router.get("/courses/search", response_model=list[CourseModel])
+def get_courses_search(search: str, db: Session = Depends(get_db)):
+    results = db.query(Course).filter(
+        or_(
+            Course.title.ilike(search),
+            Course.prefix.ilike(search),
+            Course.credits.cast(String).ilike(search),
+            Course.degree_id.cast(String).ilike(search),
+        )
+    ).all()
+
+    return results
