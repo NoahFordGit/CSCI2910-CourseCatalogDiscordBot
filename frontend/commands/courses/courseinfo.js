@@ -49,7 +49,7 @@ module.exports = {
             const courseEmbed = new EmbedBuilder()
                 .setColor(0xFFC72C)
                 .setTitle(`Course Information for ${courseId}`)
-                .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/3/36/ETSU_Bucs_logo.svg/1200px-ETSU_Bucs_logo.svg.png')
+                .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/East_Tennessee_State_Buccaneers_logo.svg/1200px-East_Tennessee_State_Buccaneers_logo.png')
                 .setTimestamp()
                 .setFooter({ text: `Requested by ${interaction.user.tag}` });
 
