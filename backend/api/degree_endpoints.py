@@ -17,6 +17,7 @@ def get_degrees(db: Session = Depends(get_db)):
 # the type, title, department, level, concentration
 @router.get("/degrees/search", response_model=list[DegreeModel])
 def get_degrees_search(
+    id: str | None = None,
     type: str | None = None,
     title: str | None = None,
     department: str | None = None,
@@ -26,6 +27,9 @@ def get_degrees_search(
 ):
     query = db.query(Degree)
 
+    if id:
+        query = query.filter(Degree.degree_id.ilike(f"%{id}%"))
+        
     if type:
         query = query.filter(Degree.type.ilike(f"%{type}%"))
     
