@@ -3,6 +3,13 @@ cbat_base.db change log --- by Olivia Smith
 This is where changes to the database will be logged for future reference, starting with the commit on 11/11/25. Most recent commits will appear first. If anything is missing or incorrect, contact me asap.
 
 
+---------------
+
+Commit 12/1/25:
+
+- Added ENTP courses to the course table
+- Added (most, see note) degree_course entries for degrees 7-20 
+- NOTE: Certain degrees have a group of courses to pick from for their major courses. I'm currently finding a way around this but for now, only the 	hardcore major courses were added
 
 ---------------
 
