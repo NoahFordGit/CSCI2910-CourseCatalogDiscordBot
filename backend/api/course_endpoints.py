@@ -17,6 +17,7 @@ def get_courses(db: Session = Depends(get_db)):
 # the title, prefix, credits, or degree_id
 @router.get("/courses/search", response_model=list[CourseModel])
 def get_courses_search(
+    id: str | None = None,
     title: str | None = None,
     prefix: str | None = None,
     credits: int | None = None,
@@ -24,6 +25,9 @@ def get_courses_search(
     db: Session = Depends(get_db)
 ):
     query = db.query(Course)
+
+    if id:
+        query = query.filter(Course.course_id.ilike(f"%{id}%"))
 
     if title:
         query = query.filter(Course.title.ilike(f"%{title}%"))
