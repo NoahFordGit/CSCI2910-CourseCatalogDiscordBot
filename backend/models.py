@@ -30,9 +30,10 @@ class Course(Base):
 
 class CourseRequisites(Base):
     __tablename__ = "course_requisites"
-    course_id = Column(String(50), ForeignKey("course.course_id"), primary_key=True, nullable=False)
-    prereq_id = Column(String(50), ForeignKey("course.course_id"), nullable=True)
-    coreq_id = Column(String(50), ForeignKey("course.course_id"), nullable=True)
+
+    course_id = Column(String(50), ForeignKey("course.course_id"), primary_key=True)
+    prereq_id = Column(String(50), ForeignKey("course.course_id"), primary_key=True, nullable=True)
+    coreq_id = Column(String(50), ForeignKey("course.course_id"), primary_key=True, nullable=True)
 
     # relationships to Course for convenience
     course = relationship("Course", foreign_keys=[course_id], backref="requisites")

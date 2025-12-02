@@ -61,6 +61,7 @@ def get_requisites(course_id: str, db: Session = Depends(get_db)):
       .filter(CourseRequisites.course_id == course_id)
       .all()
     )
+    
     return requisites
 
 # get prereq courses for course_id
