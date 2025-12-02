@@ -19,36 +19,43 @@ module.exports = {
 
 		// Handle button interactions
 		if (interaction.isButton()) {
-			const originalUser = interaction.message.interaction?.user?.id;
+			if (interaction.customId === "go_to_courselist") {
+				const originalUser = interaction.message.interaction?.user?.id;
 
-			if (originalUser && interaction.user.id !== originalUser) {
-				return interaction.reply({
-					content: "These controls aren't for you!",
-					ephemeral: true
-				});
-			}
+				if (originalUser && interaction.user.id !== originalUser) {
+					try {
+						return await interaction.reply({
+							content: "These controls aren't for you!",
+							ephemeral: true
+						});
+					} catch (err) {
+						console.debug('ignored interaction.reply error for unauthorized button:', err?.message || err);
+						return;
+					}
+				}
 
-            if (interaction.customId === "go_to_courselist") {
 				const cmd = interaction.client.commands.get("courselist");
 				return cmd.execute(interaction, true);
 			}
 
-            return;
-        }
+			return;
+		}
 
 		// Handle select menu interactions
 		if (interaction.isStringSelectMenu()) {
-
-			const originalUser = interaction.message.interaction?.user?.id;
-
-			if (originalUser && interaction.user.id !== originalUser) {
-				return interaction.reply({
-					content: "These controls aren't for you!",
-					ephemeral: true
-				});
+			if (interaction.customId === 'select_course') {
+				const originalUser = interaction.message.interaction?.user?.id;
+				if (originalUser && interaction.user.id !== originalUser) {
+					try {
+						return await interaction.reply({ content: "These controls aren't for you!", ephemeral: true });
+					} catch (err) {
+						console.debug('ignored interaction.reply error for unauthorized select:', err?.message || err);
+						return;
+					}
+				}
 			}
 
-				return;
+			return;
 		}
 
 		// Handle chat input commands
