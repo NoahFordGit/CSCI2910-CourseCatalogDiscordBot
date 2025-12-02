@@ -38,6 +38,26 @@ module.exports = {
 				return cmd.execute(interaction, true);
 			}
 
+			if (interaction.customId.startsWith("go_to_requisites")) {
+				const originalUser = interaction.message.interaction?.user?.id;
+				const [_, courseId] = interaction.customId.split(":");
+
+				if (originalUser && interaction.user.id !== originalUser) {
+					try {
+						return await interaction.reply({
+							content: "These controls aren't for you!",
+							ephemeral: true
+						});
+					} catch (err) {
+						console.debug('ignored interaction.reply error for unauthorized button:', err?.message || err);
+						return;
+					}
+				}
+
+				const cmd = interaction.client.commands.get("course_requisites");
+				return cmd.execute(interaction, courseId, true);
+			}
+
 			return;
 		}
 
