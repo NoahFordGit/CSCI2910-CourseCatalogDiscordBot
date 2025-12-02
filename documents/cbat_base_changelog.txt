@@ -4,7 +4,14 @@ This is where changes to the database will be logged for future reference, start
 
 ---------------
 
-Commit 12/2/25:
+Commit (2/2) 12/2/25:
+
+- Fixed an error with the incorrect credit values in the course table for SALM-4900 and SALM-4957
+
+
+---------------
+
+Commit (1/2) 12/2/25:
 
 - Added SALM courses to the course table
 - Added SALM entries to the course_requisites table
