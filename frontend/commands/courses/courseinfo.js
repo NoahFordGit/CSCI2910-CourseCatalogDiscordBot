@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { EmbedBuilder } = require('discord.js');
 const axios = require('axios');
 
@@ -36,16 +36,19 @@ module.exports = {
     },
 
     // Execute handler
-	async execute(interaction) {
-        await interaction.deferReply();
-
+	async execute(interaction, courseID, fromButton = false) {
         try {
-            const courseId = interaction.options.getString('courseid');
+            const courseId = courseID || interaction.options.getString('courseid');
             const FASTAPI_URL = `http://127.0.0.1:8000/courses/${encodeURIComponent(courseId)}`;
-            
             const response = await axios.get(FASTAPI_URL, { timeout: 2000 });
             const course = response.data;
-
+            
+            // Determine interaction type and make sure we don't double-defer/reply
+            if (!fromButton) {
+                if (!interaction.deferred && !interaction.replied) await interaction.deferReply();
+            }
+            
+            // Embed
             const courseEmbed = new EmbedBuilder()
                 .setColor(0xFFC72C)
                 .setTitle(`Course Information for ${courseId}`)
@@ -60,7 +63,41 @@ module.exports = {
                 { name: 'Description', value: course.description || 'N/A', inline: false },
             );
 
-            await interaction.editReply({ embeds: [courseEmbed] });
+            // Button row
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId('go_to_courselist')
+                    .setLabel('See all courses')
+                    .setStyle(ButtonStyle.Primary)
+            );
+            
+            if (fromButton) {
+                // Prefer a single interaction.update() when possible to both acknowledge and update the original message.
+                try {
+                    if (!interaction.deferred && !interaction.replied) {
+                        return await interaction.update({ embeds: [courseEmbed], components: [row] });
+                    }
+
+                    // If the interaction was already acknowledged, edit the original message directly.
+                    if (interaction.message) {
+                        await interaction.message.edit({ embeds: [courseEmbed], components: [row] });
+                        return;
+                    }
+
+                    // As a safe fallback, attempt a followUp (ephemeral) so the user still sees the result.
+                    return await interaction.followUp({ embeds: [courseEmbed], components: [row], ephemeral: true });
+                } catch (err) {
+                    // If update fails (unknown/expired interaction) try a direct message edit fallback.
+                    if (interaction.message) {
+                        try { await interaction.message.edit({ embeds: [courseEmbed], components: [row] }); return; } catch (e) {}
+                    }
+                    // Final fallback: try to reply or followUp however possible
+                    try { if (!interaction.deferred && !interaction.replied) await interaction.deferUpdate(); } catch (e) {}
+                    try { return await interaction.followUp({ embeds: [courseEmbed], components: [row], ephemeral: true }); } catch (e) {}
+                }
+            } else {
+                return await interaction.editReply({ embeds: [courseEmbed], components: [row], fetchReply: true });
+            }
 
         } catch (error) {
             console.log('Error fetching course information:', error);
@@ -68,9 +105,33 @@ module.exports = {
             const errorEmbed = new EmbedBuilder()
                 .setColor(0xFF2C2C)
                 .setTitle('Error Fetching Course Information')
-                .setDescription(`Could not fetch course ID: **${courseId}**`);
+                .setDescription(`Could not fetch course ID, please ensure it is valid.`);
 
-            await interaction.editReply({ embeds: [errorEmbed] });
+            // Safe error handling for both command and component interactions
+            if (fromButton) {
+                // Try to update the message directly (best-effort) or send a follow-up
+                try {
+                    if (!interaction.deferred && !interaction.replied) {
+                        await interaction.update({ embeds: [errorEmbed], components: [] });
+                        return;
+                    }
+                } catch (err) {
+                    // If update fails, try editing the message then fall back to followUp
+                    if (interaction.message) {
+                        try { await interaction.message.edit({ embeds: [errorEmbed], components: [] }); return; } catch (e) {}
+                    }
+                    try { await interaction.followUp({ embeds: [errorEmbed], ephemeral: true }); return; } catch (e) {}
+                }
+
+                // If nothing worked, silence it (we already tried best-effort)
+                return;
+            }
+
+            // For a normal slash invocation make sure we have deferred or replied before editing
+            if (!interaction.deferred && !interaction.replied) {
+                await interaction.deferReply();
+            }
+            return await interaction.editReply({ embeds: [errorEmbed] });
         }
 	},
 };
