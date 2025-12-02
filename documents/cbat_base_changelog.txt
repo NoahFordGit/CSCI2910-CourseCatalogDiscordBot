@@ -2,6 +2,13 @@ cbat_base.db change log --- by Olivia Smith
 
 This is where changes to the database will be logged for future reference, starting with the commit on 11/11/25. Most recent commits will appear first. If anything is missing or incorrect, contact me asap.
 
+---------------
+
+Commit 12/2/25:
+
+- Added SALM courses to the course table
+- Added SALM entries to the course_requisites table
+- Added (most, see note from commit 12/1) degree_course entries for degrees 21-36
 
 ---------------
 
@@ -16,7 +23,7 @@ Commit 12/1/25:
 Commit 11/28/25:
 
 - Added all course_requisites entries for MGMT, DIGM, and MCOM courses
-- NOTE: it was planned to also have course_requisites entries for SCMT courses, however a foreign key issue is currently 	creating issues for some of these. I will fix this ASAP but for now they will be omitted
+- NOTE: it was planned to also have course_requisites entries for SCMT courses, however a foreign key issue is currently creating issues for some 	of these. I will fix this ASAP but for now they will be omitted
 
 ---------------
 
