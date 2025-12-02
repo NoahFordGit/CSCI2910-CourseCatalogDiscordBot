@@ -67,7 +67,7 @@ module.exports = {
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId('go_to_courselist')
-                    .setLabel('See all courses')
+                    .setLabel('See all Courses')
                     .setStyle(ButtonStyle.Success),
                 new ButtonBuilder()
                     .setCustomId(`go_to_requisites:${courseId}`)
