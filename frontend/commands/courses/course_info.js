@@ -68,6 +68,10 @@ module.exports = {
                 new ButtonBuilder()
                     .setCustomId('go_to_courselist')
                     .setLabel('See all courses')
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId(`go_to_requisites:${courseId}`)
+                    .setLabel('See all Requisite Courses')
                     .setStyle(ButtonStyle.Primary)
             );
             
