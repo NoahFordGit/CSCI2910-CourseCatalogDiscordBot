@@ -1,5 +1,5 @@
-const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+const autocompleteCourseId = require('../../utils/autocompleteCourseId'); 
 const axios = require('axios');
 
 module.exports = {
@@ -12,33 +12,14 @@ module.exports = {
                 .setAutocomplete(true)
                 .setRequired(true)
         ),
-    
+
     // Autocomplete handler
-    async autocomplete(interaction) {
-        const focused = interaction.options.getFocused();
-
-        const FASTAPI_URL = `http://127.0.0.1:8000/courses/search?id=${encodeURIComponent(focused)}`;
-
-        try {
-            const response = await axios.get(FASTAPI_URL, { timeout: 2000 });
-            const courses = Array.isArray(response.data) ? response.data : [];
-
-            const choices = courses.slice(0, 25).map(course => ({
-                name: `${course.course_id}`,
-                value: course.course_id
-            }));
-            
-            await interaction.respond(choices);
-
-        } catch (error) {
-            await interaction.respond([]);
-        }
-    },
-
+    autocomplete: autocompleteCourseId,
+    
     // Execute handler
-	async execute(interaction, courseID, fromButton = false) {
+	async execute(interaction, courseID = null, fromButton = false) {
         try {
-            const courseId = courseID || interaction.options.getString('courseid');
+            const courseId = courseID || interaction.options?.getString('courseid');
             const REQUISITE_URL = `http://127.0.0.1:8000/courses/${encodeURIComponent(courseId)}/requisites`;
             const COURSE_URL = `http://127.0.0.1:8000/courses/${encodeURIComponent(courseId)}`;
 
@@ -136,12 +117,32 @@ module.exports = {
             );
 
             // Button row
-            const row = new ActionRowBuilder().addComponents(
+            const buttons = [
                 new ButtonBuilder()
                     .setCustomId('go_to_courselist')
-                    .setLabel('See all courses')
-                    .setStyle(ButtonStyle.Primary)
-            );
+                    .setLabel('See all Courses')
+                    .setStyle(ButtonStyle.Success),
+            ];
+
+            if (prereqIds.length > 0) {
+                buttons.push(
+                    new ButtonBuilder()
+                        .setCustomId('go_to_prerequisites')
+                        .setLabel('See Prerequisite Info')
+                        .setStyle(ButtonStyle.Primary)
+                );
+            }
+
+            if (coreqIds.length > 0) {
+                buttons.push(
+                    new ButtonBuilder()
+                        .setCustomId('go_to_corequisites')
+                        .setLabel('See Corequisite Info')
+                        .setStyle(ButtonStyle.Primary)
+                );
+            }
+
+            const row = new ActionRowBuilder().addComponents(buttons);
             
             if (fromButton) {
                 // Prefer a single interaction.update() when possible to both acknowledge and update the original message.
