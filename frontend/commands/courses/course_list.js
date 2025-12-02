@@ -26,7 +26,7 @@ module.exports = {
             const errorEmbed = new EmbedBuilder()
                 .setColor(0xFF2C2C)
                 .setTitle('Error Fetching Course List')
-                .setDescription(`Could not fetch list of courses.`);
+                .setDescription(`Could not fetch list of courses. Please try again later.`);
 
             if (fromButton) {
                 return await interaction.reply({ embeds: [errorEmbed] });
