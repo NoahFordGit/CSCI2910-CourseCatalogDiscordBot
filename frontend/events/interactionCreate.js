@@ -17,6 +17,40 @@ module.exports = {
 			return;
 		}
 
+		// Handle button interactions
+		if (interaction.isButton()) {
+			const originalUser = interaction.message.interaction?.user?.id;
+
+			if (originalUser && interaction.user.id !== originalUser) {
+				return interaction.reply({
+					content: "These controls aren't for you!",
+					ephemeral: true
+				});
+			}
+
+            if (interaction.customId === "go_to_courselist") {
+				const cmd = interaction.client.commands.get("courselist");
+				return cmd.execute(interaction, true);
+			}
+
+            return;
+        }
+
+		// Handle select menu interactions
+		if (interaction.isStringSelectMenu()) {
+
+			const originalUser = interaction.message.interaction?.user?.id;
+
+			if (originalUser && interaction.user.id !== originalUser) {
+				return interaction.reply({
+					content: "These controls aren't for you!",
+					ephemeral: true
+				});
+			}
+
+				return;
+		}
+
 		// Handle chat input commands
 		if (!interaction.isChatInputCommand()) return;
 
