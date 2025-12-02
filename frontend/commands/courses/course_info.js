@@ -1,5 +1,5 @@
-const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+const autocompleteCourseId = require('../../utils/autocompleteCourseId'); 
 const axios = require('axios');
 
 module.exports = {
@@ -14,26 +14,7 @@ module.exports = {
         ),
     
     // Autocomplete handler
-    async autocomplete(interaction) {
-        const focused = interaction.options.getFocused();
-
-        const FASTAPI_URL = `http://127.0.0.1:8000/courses/search?id=${encodeURIComponent(focused)}`;
-
-        try {
-            const response = await axios.get(FASTAPI_URL, { timeout: 2000 });
-            const courses = Array.isArray(response.data) ? response.data : [];
-
-            const choices = courses.slice(0, 25).map(course => ({
-                name: `${course.course_id}`,
-                value: course.course_id
-            }));
-            
-            await interaction.respond(choices);
-
-        } catch (error) {
-            await interaction.respond([]);
-        }
-    },
+    autocomplete: autocompleteCourseId,
 
     // Execute handler
 	async execute(interaction, courseID, fromButton = false) {
@@ -58,7 +39,7 @@ module.exports = {
 
             courseEmbed.addFields(
                 { name: 'Title', value: course.title || 'N/A', inline: false },
-                { name: 'Course ID', value: course.course_id || 'N/A', inline: true },
+                { name: 'Course ID', value: `\`${course.course_id}\`` || 'N/A', inline: true },
                 { name: 'Credits', value: course.credits ? course.credits.toString() : 'N/A', inline: true },
                 { name: 'Description', value: course.description || 'N/A', inline: false },
             );
