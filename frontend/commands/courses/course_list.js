@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
 const axios = require('axios');
-const courseInfo = require('./courseinfo');
+const courseInfo = require('./course_info');
 
 module.exports = {
     data: new SlashCommandBuilder()

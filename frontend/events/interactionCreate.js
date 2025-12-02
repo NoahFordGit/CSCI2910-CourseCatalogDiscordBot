@@ -34,7 +34,7 @@ module.exports = {
 					}
 				}
 
-				const cmd = interaction.client.commands.get("courselist");
+				const cmd = interaction.client.commands.get("course_list");
 				return cmd.execute(interaction, true);
 			}
 
