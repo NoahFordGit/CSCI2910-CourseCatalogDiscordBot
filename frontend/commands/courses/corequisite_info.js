@@ -59,10 +59,17 @@ module.exports = {
                     .setTimestamp()
                     .setFooter({ text: `Course: ${courseId}` });
                 
+                const row = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('go_to_courselist')
+                        .setLabel('See all Courses')
+                        .setStyle(ButtonStyle.Success)
+                );
+
                 if (fromButton) {
-                    return await interaction.update({ embeds: [noneEmbed], components: [] });
+                    return await interaction.update({ embeds: [noneEmbed], components: [row] });
                 } else {
-                    return await interaction.editReply({ embeds: [noneEmbed], components: [] });
+                    return await interaction.editReply({ embeds: [noneEmbed], components: [row] });
                 }
             }
 
