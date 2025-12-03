@@ -64,8 +64,8 @@ def get_requisites(course_id: str, db: Session = Depends(get_db)):
     
     return requisites
 
-# get prereq courses for course_id
-@router.get("/courses/{course_id}/prerequisites", response_model=list[str])
+# get prereq courses for course_id (return full CourseModel objects)
+@router.get("/courses/{course_id}/prerequisites", response_model=list[CourseModel])
 def get_prerequisites(course_id: str, db: Session = Depends(get_db)):
     reqs = (
         db.query(CourseRequisites)
@@ -73,13 +73,19 @@ def get_prerequisites(course_id: str, db: Session = Depends(get_db)):
         .all()
     )
 
-    # filter for only not None prereqs
-    prereqs = [r.prereq_id for r in reqs if r.prereq_id is not None]
+    prereq_ids = [r.prereq_id for r in reqs if r.prereq_id is not None]
 
-    return prereqs
+    if not prereq_ids:
+        return []
 
-# get coreq courses for course_id
-@router.get("/courses/{course_id}/corequisites", response_model=list[str])
+    courses = db.query(Course).filter(Course.course_id.in_(prereq_ids)).all()
+    course_map = {c.course_id: c for c in courses}
+
+    ordered = [course_map[cid] for cid in prereq_ids if cid in course_map]
+    return ordered
+
+# get coreq courses for course_id (return full CourseModel objects)
+@router.get("/courses/{course_id}/corequisites", response_model=list[CourseModel])
 def get_coreqs(course_id: str, db: Session = Depends(get_db)):
     reqs = (
         db.query(CourseRequisites)
@@ -87,7 +93,13 @@ def get_coreqs(course_id: str, db: Session = Depends(get_db)):
         .all()
     )
 
-    # filter for only not None prereqs
-    coreqs = [r.coreq_id for r in reqs if r.coreq_id is not None]
+    coreq_ids = [r.coreq_id for r in reqs if r.coreq_id is not None]
 
-    return coreqs
+    if not coreq_ids:
+        return []
+
+    courses = db.query(Course).filter(Course.course_id.in_(coreq_ids)).all()
+    course_map = {c.course_id: c for c in courses}
+
+    ordered = [course_map[cid] for cid in coreq_ids if cid in course_map]
+    return ordered
