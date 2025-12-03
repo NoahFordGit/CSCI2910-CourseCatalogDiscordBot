@@ -67,6 +67,11 @@ def get_requisites(course_id: str, db: Session = Depends(get_db)):
 # get prereq courses for course_id (return full CourseModel objects)
 @router.get("/courses/{course_id}/prerequisites", response_model=list[CourseModel])
 def get_prerequisites(course_id: str, db: Session = Depends(get_db)):
+    # Validate course exists
+    course = db.get(Course, course_id)
+    if course is None:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
     reqs = (
         db.query(CourseRequisites)
         .filter(CourseRequisites.course_id == course_id)
@@ -87,6 +92,11 @@ def get_prerequisites(course_id: str, db: Session = Depends(get_db)):
 # get coreq courses for course_id (return full CourseModel objects)
 @router.get("/courses/{course_id}/corequisites", response_model=list[CourseModel])
 def get_coreqs(course_id: str, db: Session = Depends(get_db)):
+    # Validate course exists
+    course = db.get(Course, course_id)
+    if course is None:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
     reqs = (
         db.query(CourseRequisites)
         .filter(CourseRequisites.course_id == course_id)
