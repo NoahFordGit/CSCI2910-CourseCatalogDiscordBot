@@ -23,8 +23,25 @@ module.exports = {
             const REQUISITE_URL = `http://127.0.0.1:8000/courses/${encodeURIComponent(courseId)}/requisites`;
             const COURSE_URL = `http://127.0.0.1:8000/courses/${encodeURIComponent(courseId)}`;
 
-            const reqResponse = await axios.get(REQUISITE_URL, { timeout: 2000 });
-            const courseResponse = await axios.get(COURSE_URL, { timeout: 2000 });
+            let reqResponse, courseResponse;
+            
+            try {
+                reqResponse = await axios.get(REQUISITE_URL, { timeout: 2000 });
+                courseResponse = await axios.get(COURSE_URL, { timeout: 2000 });
+            } catch (err) {
+                if (err.response?.status === 404) {
+                    throw new Error('Course not found. Please check the Course ID and try again.');
+                }
+                throw err;
+            }
+
+            // Validate response data
+            if (!courseResponse.data || typeof courseResponse.data !== 'object' || !courseResponse.data.course_id) {
+                throw new Error('Invalid course data received from API.');
+            }
+            if (!Array.isArray(reqResponse.data)) {
+                throw new Error('Invalid requisites data received from API.');
+            }
 
             const courseTitle = courseResponse.data.title || 'N/A';
             let prereqIds = [];
@@ -177,7 +194,7 @@ module.exports = {
 
             const errorEmbed = new EmbedBuilder()
                 .setColor(0xFF2C2C)
-                .setTitle('Error Fetching Course Information')
+                .setTitle('Error Fetching Requisite Information')
                 .setDescription(`Could not fetch course ID, please ensure it is valid.`);
 
             // Safe error handling for both command and component interactions

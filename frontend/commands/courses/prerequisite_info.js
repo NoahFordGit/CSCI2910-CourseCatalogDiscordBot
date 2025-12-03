@@ -24,16 +24,46 @@ module.exports = {
         try {
             const courseId = courseID || interaction.options.getString('courseid');
             const FASTAPI_URL = `http://127.0.0.1:8000/courses/${encodeURIComponent(courseId)}/prerequisites`;
-            const response = await axios.get(FASTAPI_URL, { timeout: 2000 });
+            let response;
+            try {
+                response = await axios.get(FASTAPI_URL, { timeout: 2000 });
+            } catch (err) {
+                if (err.response?.status === 404) {
+                    throw new Error('Course not found. Please check the Course ID and try again.');
+                }
+                throw err;
+            }
             const prereqs = response.data;
+
+            // Validate response is an array
+            if (!Array.isArray(prereqs)) {
+                throw new Error('Invalid prerequisites data received from API.');
+            }
 
             // Determine interaction type and make sure we don't double-defer/reply
             if (!fromButton) {
                 if (!interaction.deferred && !interaction.replied) await interaction.deferReply();
             }
-            
+
             let page = 0;
             let maxPage = prereqs.length - 1;
+
+            // Handle empty prerequisites
+            if (prereqs.length === 0) {
+                const noneEmbed = new EmbedBuilder()
+                    .setColor(0xFFC72C)
+                    .setTitle(`${courseId} Prerequisites`)
+                    .setDescription('This course has no prerequisites.')
+                    .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/East_Tennessee_State_Buccaneers_logo.svg/1200px-East_Tennessee_State_Buccaneers_logo.png')
+                    .setTimestamp()
+                    .setFooter({ text: `Course: ${courseId}` });
+                
+                if (fromButton) {
+                    return await interaction.update({ embeds: [noneEmbed], components: [] });
+                } else {
+                    return await interaction.editReply({ embeds: [noneEmbed], components: [] });
+                }
+            }
 
 
             // Embed generator
@@ -153,7 +183,7 @@ module.exports = {
 
             const errorEmbed = new EmbedBuilder()
                 .setColor(0xFF2C2C)
-                .setTitle('Error Fetching Course Information')
+                .setTitle('Error Fetching Course Prerequisites')
                 .setDescription(`Could not fetch course ID, please ensure it is valid.`);
 
             // Safe error handling for both command and component interactions

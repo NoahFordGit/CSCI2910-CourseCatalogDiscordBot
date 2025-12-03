@@ -21,8 +21,22 @@ module.exports = {
         try {
             const courseId = courseID || interaction.options.getString('courseid');
             const FASTAPI_URL = `http://127.0.0.1:8000/courses/${encodeURIComponent(courseId)}`;
-            const response = await axios.get(FASTAPI_URL, { timeout: 2000 });
+            let response;
+            
+            try {
+                response = await axios.get(FASTAPI_URL, { timeout: 2000 });
+            } catch (err) {
+                if (err.response?.status === 404) {
+                    throw new Error('Course not found. Please check the Course ID and try again.');
+                }
+                throw err;
+            }
             const course = response.data;
+
+            // Validate response data
+            if (!course || typeof course !== 'object' || !course.course_id) {
+                throw new Error('Invalid course data received from API.');
+            }
             
             // Determine interaction type and make sure we don't double-defer/reply
             if (!fromButton) {
