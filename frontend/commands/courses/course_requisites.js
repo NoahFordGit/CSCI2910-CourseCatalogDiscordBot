@@ -127,7 +127,7 @@ module.exports = {
             if (prereqIds.length > 0) {
                 buttons.push(
                     new ButtonBuilder()
-                        .setCustomId('go_to_prerequisites')
+                        .setCustomId(`go_to_prerequisites:${courseId}`)
                         .setLabel('See Prerequisite Info')
                         .setStyle(ButtonStyle.Primary)
                 );
@@ -136,7 +136,7 @@ module.exports = {
             if (coreqIds.length > 0) {
                 buttons.push(
                     new ButtonBuilder()
-                        .setCustomId('go_to_corequisites')
+                        .setCustomId(`go_to_corequisites:${courseId}`)
                         .setLabel('See Corequisite Info')
                         .setStyle(ButtonStyle.Primary)
                 );

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
 const axios = require('axios');
 const courseInfo = require('./course_info');
+const collectorManager = require('../../utils/collectorManager');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,10 +10,26 @@ module.exports = {
 
     // Execute handler
     async execute(interaction, fromButton = false) {
-        if (!fromButton) {
-            if (!interaction.deferred && !interaction.replied) await interaction.deferReply();
-        } else {
-            if (!interaction.deferred && !interaction.replied) await interaction.deferUpdate();
+        // Try to acknowledge the interaction safely. If deferUpdate fails (unknown/expired interaction),
+        // fall back to editing the original message when possible.
+        let fallbackToMessage = false;
+        try {
+            if (!fromButton) {
+                if (!interaction.deferred && !interaction.replied) await interaction.deferReply();
+            } else {
+                if (!interaction.deferred && !interaction.replied) {
+                    try {
+                        await interaction.deferUpdate();
+                    } catch (err) {
+                        console.warn('deferUpdate failed in course_list.execute, will fallback to message.edit:', err?.message || err);
+                        fallbackToMessage = true;
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn('Acknowledgement step failed in course_list.execute:', err?.message || err);
+            // If acknowledgement completely failed, try to continue and rely on message editing fallbacks below
+            fallbackToMessage = true;
         }
         
         let courses = [];
@@ -97,7 +114,19 @@ module.exports = {
         const components = [generateButtons(), generateSelectMenu()];
         let message;
 
-        if (interaction.replied || interaction.deferred) {
+        if (fallbackToMessage && interaction.message) {
+            try {
+                console.log('Fallback: editing original message with courselist');
+                message = await interaction.message.edit({ embeds: [embed], components, fetchReply: true });
+            } catch (err) {
+                console.warn('Fallback message.edit failed, will try reply/editReply instead:', err?.message || err);
+                if (interaction.replied || interaction.deferred) {
+                    message = await interaction.editReply({ embeds: [embed], components, fetchReply: true});
+                } else {
+                    message = await interaction.reply({ embeds: [embed], components, fetchReply: true});
+                }
+            }
+        } else if (interaction.replied || interaction.deferred) {
             console.log("Editing reply with courselist");
             message = await interaction.editReply({ embeds: [embed], components, fetchReply: true});
         } else {
@@ -105,22 +134,10 @@ module.exports = {
             message = await interaction.reply({ embeds: [embed], components, fetchReply: true});
         }
 
-        try {
-            if (globalThis._courselistCollector) {
-                try {
-                    if (globalThis._courselistCollector.collector) globalThis._courselistCollector.collector.stop('replaced');
-                    else globalThis._courselistCollector.stop('replaced');
-                } catch (e) { /* ignore */ }
-                delete globalThis._courselistCollector;
-            }
-        } catch (e) { /* ignore */ }
-
-        // Collector for buttons and select menu
-        const collector = message.createMessageComponentCollector({ time: 5 * 60 * 1000 }); // 5 min
-        globalThis._courselistCollector = { collector, messageId: message.id };
-
-        if (collector)
-            console.log("Collector created for courselist");
+        // stop any previous courselist collector, then create a new one
+        try { collectorManager.stop('courselist'); } catch (e) { /* ignore */ }
+        const collector = collectorManager.create('courselist', message, { time: 5 * 60 * 1000 }); // 5 min
+        if (collector) console.log('Collector created for courselist');
 
         collector.on('collect', async i => {
             if (i.user.id !== interaction.user.id) {
@@ -164,10 +181,8 @@ module.exports = {
                     await courseInfo.execute(i, selectedCourseId, true);
 
                     try {
-                        if (globalThis._courselistCollector && globalThis._courselistCollector.collector === collector) {
-                            collector.stop('navigated');
-                            delete globalThis._courselistCollector;
-                        }
+                        const info = collectorManager.getInfo('courselist');
+                        if (info && info.collector === collector) collectorManager.stop('courselist', 'navigated');
                     } catch (e) { /* ignore */ }
 
                 } catch (err) {
@@ -185,15 +200,10 @@ module.exports = {
         // Collector end handling
         collector.on('end', async (collected, reason) => {
             try {
-                if (
-                    globalThis._courselistCollector &&
-                    globalThis._courselistCollector.collector === collector &&
-                    globalThis._courselistCollector.messageId === message.id
-                ) {
-                    delete globalThis._courselistCollector;
-
+                const info = collectorManager.getInfo('courselist');
+                if (info && info.collector === collector && info.messageId === message.id) {
+                    // manager will delete the store entry on end; just disable buttons when timed out
                     if (reason === 'time') {
-                        // Disable buttons/select menu after timeout
                         const disabledRow = new ActionRowBuilder().addComponents(
                             new ButtonBuilder().setCustomId('previous').setLabel('⬅️ Prev').setStyle(ButtonStyle.Primary).setDisabled(true),
                             new ButtonBuilder().setCustomId('next').setLabel('Next ➡️').setStyle(ButtonStyle.Primary).setDisabled(true)
