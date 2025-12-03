@@ -63,7 +63,7 @@ def get_courses(degreeId: int, db: Session = Depends(get_db)):
     degree_courses = db.query(DegreeCourse).filter(DegreeCourse.degree_id == degreeId).all()
     course_ids = [c.course_id for c in degree_courses]
 
-    courses = db.query(Course).filter(DegreeCourse.course_id.in_(course_ids)).all()
+    courses = db.query(Course).filter(Course.course_id.in_(course_ids)).all()
     return courses
 
 # Gets all degrees that contain a course specified by course ID
