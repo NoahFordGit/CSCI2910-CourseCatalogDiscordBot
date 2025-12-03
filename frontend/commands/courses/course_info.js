@@ -5,7 +5,7 @@ const axios = require('axios');
 module.exports = {
 	data: new SlashCommandBuilder()
         .setName('course_info')
-        .setDescription('Look up course information from the a Course ID (e.g., CSCI1250).')
+        .setDescription('Look up course information from a Course ID (e.g., CSCI1250).')
         .addStringOption(option => 
             option.setName('courseid')
                 .setDescription('Start typing a Course ID... (autocomplete only shows first 25 results)')
