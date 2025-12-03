@@ -6,9 +6,9 @@ const courseList = require('./course_list');
 const axios = require('axios');
 
 module.exports = {
-	data: new SlashCommandBuilder()
-        .setName('course_prerequisites')
-        .setDescription('Look up all prerequisite courses from a Course ID (e.g., CSCI1250).')
+    data: new SlashCommandBuilder()
+        .setName('course_corequisites')
+        .setDescription('Look up all corequisite courses from a Course ID (e.g., CSCI1250).')
         .addStringOption(option => 
             option.setName('courseid')
                 .setDescription('Start typing a Course ID... (autocomplete only shows first 25 results)')
@@ -20,12 +20,12 @@ module.exports = {
     autocomplete: autocompleteCourseId,
 
     // Execute handler
-	async execute(interaction, courseID, fromButton = false) {
+    async execute(interaction, courseID, fromButton = false) {
         try {
             const courseId = courseID || interaction.options.getString('courseid');
-            const FASTAPI_URL = `http://127.0.0.1:8000/courses/${encodeURIComponent(courseId)}/prerequisites`;
+            const FASTAPI_URL = `http://127.0.0.1:8000/courses/${encodeURIComponent(courseId)}/corequisites`;
             const response = await axios.get(FASTAPI_URL, { timeout: 2000 });
-            const prereqs = response.data;
+            const coreqs = response.data;
 
             // Determine interaction type and make sure we don't double-defer/reply
             if (!fromButton) {
@@ -33,15 +33,15 @@ module.exports = {
             }
             
             let page = 0;
-            let maxPage = prereqs.length - 1;
+            let maxPage = coreqs.length - 1;
 
 
             // Embed generator
             const generateEmbed = (page) => {
-                const c = prereqs[page];
+                const c = coreqs[page];
                 return new EmbedBuilder()
                     .setColor(0xFFC72C)
-                    .setTitle(`Prerequisite (${page + 1} of ${prereqs.length})`)
+                    .setTitle(`Corequisite (${page + 1} of ${coreqs.length})`)
                     .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/East_Tennessee_State_Buccaneers_logo.svg/1200px-East_Tennessee_State_Buccaneers_logo.png')
                     .addFields(
                         { name: 'Title', value: c.title || 'N/A', inline: false },
@@ -88,15 +88,15 @@ module.exports = {
             }
 
             // Only add a collector if there's more than one page
-            if (prereqs.length > 1 && sentMessage) {
-                try { collectorManager.stop('prereqs'); } catch (e) { /* ignore */ }
-                const collector = collectorManager.create('prereqs', sentMessage, { filter: i => i.user.id === interaction.user.id, time: 120000 });
+            if (coreqs.length > 1 && sentMessage) {
+                try { collectorManager.stop('coreqs'); } catch (e) { /* ignore */ }
+                const collector = collectorManager.create('coreqs', sentMessage, { filter: i => i.user.id === interaction.user.id, time: 120000 });
 
                 collector.on('collect', async i => {
                     try {
                         if (i.customId === 'go_to_courselist') {
                             // Delegate to the course_list command and stop this collector to avoid double-handling
-                            try { collectorManager.stop('prereqs', 'navigated'); } catch (e) { /* ignore */ }
+                            try { collectorManager.stop('coreqs', 'navigated'); } catch (e) { /* ignore */ }
                             try { await courseList.execute(i, true); } catch (e) { console.error('Delegating to course_list failed:', e); }
                             return;
                         }
@@ -121,8 +121,8 @@ module.exports = {
                                 try { await i.followUp({ embeds: [updatedEmbed], components: [updatedRow], ephemeral: true }); } catch (e) { /* ignore */ }
                             }
                         } catch (err) {
-                            console.warn('prereq update/edit fallback failed:', err?.message || err);
-                            try { if (sentMessage) await sentMessage.edit({ embeds: [updatedEmbed], components: [updatedRow] }); } catch (e) { console.error('prereq final fallback edit failed:', e); }
+                            console.warn('coreq update/edit fallback failed:', err?.message || err);
+                            try { if (sentMessage) await sentMessage.edit({ embeds: [updatedEmbed], components: [updatedRow] }); } catch (e) { console.error('coreq final fallback edit failed:', e); }
                         }
                     } catch (err) {
                         console.error('Pagination collector error:', err);
@@ -131,7 +131,7 @@ module.exports = {
 
                 collector.on('end', async (collected, reason) => {
                     try {
-                        const info = collectorManager.getInfo('prereqs');
+                        const info = collectorManager.getInfo('coreqs');
                         if (info && info.collector === collector && info.messageId === sentMessage.id) {
                             if (reason === 'time') {
                                 const disabledRow = new ActionRowBuilder().addComponents(
@@ -182,5 +182,5 @@ module.exports = {
             }
             return await interaction.editReply({ embeds: [errorEmbed] });
         }
-	},
-};
+    },
+}
