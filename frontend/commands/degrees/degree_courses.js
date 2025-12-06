@@ -116,7 +116,7 @@ module.exports = {
                     )
                     .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/East_Tennessee_State_Buccaneers_logo.svg/1200px-East_Tennessee_State_Buccaneers_logo.png')
                     .setTimestamp()
-                    .setFooter({ text: `Page ${page + 1} / ${maxPage + 1} | Requested by ${interaction.user.tag}` });
+                    .setFooter({ text: `Page ${page + 1} / ${maxPage + 1}` });
 
                 return pageEmbed;
             };
