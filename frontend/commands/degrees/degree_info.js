@@ -23,30 +23,47 @@ module.exports = {
 
     async execute(interaction, degreeData, fromButton = false) {
         try {
-            const title = interaction.options.getString('title');
-            const concentration = interaction.options.getString('concentration') || '';
-            
-            let FASTAPI_URL = `http://127.0.0.1:8000/degrees/search?title=${encodeURIComponent(title)}`;
-            if (concentration) {
-                FASTAPI_URL += `&concentration=${encodeURIComponent(concentration)}`;
-            }
-            
-            let response;
-            try {
-                response = await axios.get(FASTAPI_URL, { timeout: 2000 });
-            } catch (err) {
-                if (err.response?.status === 404) {
-                    throw new Error('Degree not found. Please check the title and try again.');
+            const rawTitle = interaction.options.getString('title');
+            let title = rawTitle;
+            let concentration = interaction.options.getString('concentration') || '';
+            let degree = null;
+
+            if (rawTitle && /^\d+$/.test(rawTitle)) {
+                const degreeId = parseInt(rawTitle, 10);
+                try {
+                    const resp = await axios.get(`http://127.0.0.1:8000/degrees/${degreeId}`, { timeout: 2000 });
+                    degree = resp.data;
+                } catch (err) {
+                    if (err.response?.status === 404) {
+                        throw new Error('Degree not found. Please check the title and try again.');
+                    }
+                    throw err;
                 }
-                throw err;
+                title = degree.title;
+                if (!concentration && degree.concentration) concentration = degree.concentration;
+            } else {
+                let FASTAPI_URL = `http://127.0.0.1:8000/degrees/search?title=${encodeURIComponent(title)}`;
+                if (concentration) {
+                    FASTAPI_URL += `&concentration=${encodeURIComponent(concentration)}`;
+                }
+
+                let response;
+                try {
+                    response = await axios.get(FASTAPI_URL, { timeout: 2000 });
+                } catch (err) {
+                    if (err.response?.status === 404) {
+                        throw new Error('Degree not found. Please check the title and try again.');
+                    }
+                    throw err;
+                }
+
+                const degrees = Array.isArray(response.data) ? response.data : [];
+                if (degrees.length === 0) {
+                    throw new Error('Degree not found. Please check the title and concentration.');
+                }
+
+                degree = degrees[0];
             }
-            
-            const degrees = Array.isArray(response.data) ? response.data : [];
-            if (degrees.length === 0) {
-                throw new Error('Degree not found. Please check the title and concentration.');
-            }
-            
-            const degree = degrees[0];
             
             if (!fromButton) {
                 if (!interaction.deferred && !interaction.replied) await interaction.deferReply();
@@ -64,7 +81,8 @@ module.exports = {
                 { name: 'Type', value: degree.type || 'N/A', inline: true },
                 { name: 'Level', value: degree.level || 'N/A', inline: true },
                 { name: 'Department', value: degree.department || 'N/A', inline: false },
-                { name: 'Concentration', value: degree.concentration || 'None', inline: false }
+                { name: 'Concentration', value: degree.concentration || 'None', inline: false },
+                { name: 'Description', value: degree.description || 'N/A', inline: false }
             );
 
             const row = new ActionRowBuilder().addComponents(

@@ -45,27 +45,35 @@ module.exports = {
         try {
             let actualDegreeId = degreeId;
             let degreeTitle = '';
-            
+
             if (!degreeId) {
-                const title = interaction.options.getString('title');
+                const rawTitle = interaction.options.getString('title');
                 const concentration = interaction.options.getString('concentration') || '';
-                
-                let FASTAPI_URL = `http://127.0.0.1:8000/degrees/search?title=${encodeURIComponent(title)}`;
-                if (concentration) {
-                    FASTAPI_URL += `&concentration=${encodeURIComponent(concentration)}`;
-                }
-                
-                const degreeResponse = await axios.get(FASTAPI_URL, { timeout: 2000 });
-                const degrees = Array.isArray(degreeResponse.data) ? degreeResponse.data : [];
-                
-                if (degrees.length === 0) {
-                    throw new Error('Degree not found.');
-                }
-                
-                actualDegreeId = degrees[0].degree_id;
-                degreeTitle = degrees[0].title;
-                if (degrees[0].concentration) {
-                    degreeTitle += ` (${degrees[0].concentration})`;
+
+                if (rawTitle && /^\d+$/.test(rawTitle)) {
+                    actualDegreeId = parseInt(rawTitle, 10);
+                    const degreeResponse = await axios.get(`http://127.0.0.1:8000/degrees/${actualDegreeId}`, { timeout: 2000 });
+                    const degree = degreeResponse.data;
+                    degreeTitle = degree.title;
+                    if (degree.concentration) degreeTitle += ` (${degree.concentration})`;
+                } else {
+                    let FASTAPI_URL = `http://127.0.0.1:8000/degrees/search?title=${encodeURIComponent(rawTitle)}`;
+                    if (concentration) {
+                        FASTAPI_URL += `&concentration=${encodeURIComponent(concentration)}`;
+                    }
+
+                    const degreeResponse = await axios.get(FASTAPI_URL, { timeout: 2000 });
+                    const degrees = Array.isArray(degreeResponse.data) ? degreeResponse.data : [];
+
+                    if (degrees.length === 0) {
+                        throw new Error('Degree not found.');
+                    }
+
+                    actualDegreeId = degrees[0].degree_id;
+                    degreeTitle = degrees[0].title;
+                    if (degrees[0].concentration) {
+                        degreeTitle += ` (${degrees[0].concentration})`;
+                    }
                 }
             } else {
                 const degreeResponse = await axios.get(`http://127.0.0.1:8000/degrees/${actualDegreeId}`, { timeout: 2000 });
@@ -113,10 +121,10 @@ module.exports = {
                         currentCourses.map(c => 
                             `\`${c.course_id.padEnd(8)}\` ${c.title.slice(0, 60)}`
                         ).join('\n')
-                    )
+                )
                     .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/East_Tennessee_State_Buccaneers_logo.svg/1200px-East_Tennessee_State_Buccaneers_logo.png')
                     .setTimestamp()
-                    .setFooter({ text: `Page ${page + 1} / ${maxPage + 1} | Requested by ${interaction.user.tag}` });
+                    .setFooter({ text: `Page ${page + 1} / ${maxPage + 1}` });
 
                 return pageEmbed;
             };
