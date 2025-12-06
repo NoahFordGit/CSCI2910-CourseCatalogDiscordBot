@@ -13,13 +13,9 @@ module.exports = async function autocompleteDegree(interaction) {
         try {
             const response = await axios.get(FASTAPI_URL, { timeout: 2000 });
             const degrees = Array.isArray(response.data) ? response.data : [];
-            
-            // Get unique titles
-            const uniqueTitles = [...new Set(degrees.map(d => d.title))];
-            
-            const choices = uniqueTitles.slice(0, 25).map(title => ({
-                name: title,
-                value: title
+            const choices = degrees.slice(0, 25).map(d => ({
+                name: d.concentration ? `${d.title} - ${d.concentration}` : d.title,
+                value: String(d.degree_id)
             }));
             
             await interaction.respond(choices);
@@ -37,10 +33,11 @@ module.exports = async function autocompleteDegree(interaction) {
         try {
             const response = await axios.get(FASTAPI_URL, { timeout: 2000 });
             const degrees = Array.isArray(response.data) ? response.data : [];
-            
-            const choices = degrees.slice(0, 25).map(degree => ({
-                name: degree.concentration || 'None',
-                value: degree.concentration || ''
+            // Return unique concentrations for the selected title
+            const uniqueConcs = [...new Set(degrees.map(d => d.concentration || ''))];
+            const choices = uniqueConcs.slice(0, 25).map(c => ({
+                name: c || 'None',
+                value: c || ''
             }));
             
             await interaction.respond(choices);
