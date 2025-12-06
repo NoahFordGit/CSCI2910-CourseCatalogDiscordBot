@@ -12,12 +12,6 @@ module.exports = {
                 .setDescription('Start typing a degree title... (autocomplete only shows first 25 results)')
                 .setAutocomplete(true)
                 .setRequired(true)
-        )
-        .addStringOption(option =>
-            option.setName('concentration')
-                .setDescription('Optional concentration (autocomplete based on selected title)')
-                .setAutocomplete(true)
-                .setRequired(false)
         ),
     
     autocomplete: autocompleteDegree,
