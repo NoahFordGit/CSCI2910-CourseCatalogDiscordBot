@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 
-# environment variables
+# super secret files
+node_modules
 .env
-*.env
+config.json
