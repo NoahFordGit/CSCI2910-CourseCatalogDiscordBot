@@ -48,5 +48,5 @@ Thank you for looking at our project!  :)
 # Project Status
 Finished can be added on to.
 
-[https://discord.com/oauth2/authorize?client_id=1439446870358364231]
+[[https://discord.com/oauth2/authorize?client_id=1439446870358364231](https://discord.com/oauth2/authorize?client_id=1439446870358364231&permissions=2147608640&integration_type=0&scope=bot)]
 
