@@ -6,12 +6,19 @@ A discord bot that uses an API rooted in a database containing courses and degre
 
 # Functionality
 /course_corerequisites - Look up all corerequisite courses from a Course ID
+
 /course_info - Look up course information from a Course ID
+
 /course_list - Displays a list of of availible courses 
+
 /course_prerequisites - Look up all prerequisite courses from a Course ID
+
 /course_requisites - Look up course requisites from a Course ID
+
 /degree_courses - View all courses for a specific degree
+
 /degree_info - Look up degree information by title and optional concentration
+
 /degree_list - Displays a paginated list of all degrees
 
 # Tech Stack
