@@ -22,7 +22,7 @@ A discord bot that uses an API rooted in a database containing courses and degre
 /degree_list - Displays a paginated list of all degrees
 
 # Tech Stack
-Language: Python
+Languages: Python, Javascript
 
 Pydantic
 
