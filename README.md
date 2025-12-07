@@ -23,10 +23,15 @@ A discord bot that uses an API rooted in a database containing courses and degre
 
 # Tech Stack
 Language: Python
+
 Pydantic
+
 Sqlalchemy
+
 FastAPI
+
 APIs: Database and API included
+
 nodejs, discord.js
 
 # Contributions
@@ -36,10 +41,12 @@ Could be added to to include the entirety of ETSU's programs.
 # Bugs & Issues
 
 # Authors and Acknoledgements 
-Authors:
+Authors: Noah Ford, Sydney Gnoth, Olivia Smith, Brock Morell, Ashley Johns
+
 Thank you for looking at our project!  :)
 
 # Project Status
 Finished can be added on to.
+
 [https://discord.com/oauth2/authorize?client_id=1439446870358364231]
 
