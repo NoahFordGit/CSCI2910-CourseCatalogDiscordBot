@@ -38,8 +38,6 @@ nodejs, discord.js
 Bot can be adjusted to fit other degrees, courses, schools, etc.  With different databases and APIs.  
 Could be added to to include the entirety of ETSU's programs. 
 
-# Bugs & Issues
-
 # Authors and Acknoledgements 
 Authors: Noah Ford, Sydney Gnoth, Olivia Smith, Brock Morell, Ashley Johns
 
